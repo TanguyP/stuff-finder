@@ -1,0 +1,9 @@
+{
+	"name": "ObjectMetaSearch",
+	"description": "A meta-search engine for objects to rent/buy",
+	"version": "0.1.0",
+	"dependencies": {
+		"nodeunit": "0.9.x"
+		,"express": "4.14.x"
+	}
+}
