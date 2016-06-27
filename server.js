@@ -21,7 +21,9 @@ const args = argParser.parseArgs();
 
 // Create server
 const server = express();
-(function() {server.get('/search/:item', function(req, res) {rentSearchApi.search(req, res, args);})})();
+(function() {
+	server.get('/search/:item', function(req, res) {rentSearchApi.search(req, res, args);})
+})();
 server.listen(8081);
 
 console.log("Server started, press Ctrl+C to exit");
