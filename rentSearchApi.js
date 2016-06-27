@@ -20,22 +20,36 @@ function parseSearchResult(callback, httpResponse) {
 			else {
 				var $ = window.$;
 				var productDom = $('#product');
+				var searchResults;
 				
-				// Get product name
-				var name = $('h1.name', productDom).html().trim();
-				
-				// Get product price on first day and on subsequent days
-				var priceTable = $('.price table', productDom);
-				var priceFirstDay = $('tr th+th h3', priceTable).html().trim();
-				var priceNonFirstDay = $('tr+tr td+td', priceTable).html().trim();
-				
-				var searchResults = {
-					name: name,
-					price: {
-						firstDay: priceFirstDay,
-						nonFirstDay: priceNonFirstDay
+				try {
+					// Get product name
+					var name = $('h1.name', productDom).html().trim();
+					
+					// Get product price on first day and on subsequent days
+					var priceTable = $('.price table', productDom);
+					var priceFirstDay = $('tr th+th h3', priceTable).html().trim();
+					var priceNonFirstDay = $('tr+tr td+td', priceTable).html().trim();
+					
+					searchResults = {
+						name: name,
+						price: {
+							firstDay: priceFirstDay,
+							nonFirstDay: priceNonFirstDay
+						}
+					};
+				}
+				catch(e) {
+					if (e instanceof TypeError) {
+						// "Recoverable" error: we couldn't get the information where we expected it in the HTML
+						searchResults = {msg: "An error occurred while parsing the result of the search API: content is not formatted as expected"};
 					}
-				};
+					else {
+						throw e;
+					}
+				}
+				
+				
 				
 				callback(searchResults);
 			}
