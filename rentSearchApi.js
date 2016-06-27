@@ -3,6 +3,34 @@ const fdHttpRequest = require('fd-http-request');
 const jsdom = require('jsdom');
 
 /**
+ * Extracts structured information about a price
+ * @param {string} priceStr	The unstructured price, e.g. "€ 12,50" or "+ € 3,75"
+ * @return {object}	The structured price, e.g. {currency: "€", amount: 12.5} or {currency: "€", amount: 3.75}
+ */
+function extractPrice(priceStr) {
+	var blankValue = {currency: null, amount: null};
+	if (typeof priceStr !== 'string') {
+		return blankValue;
+	}
+	
+	var decimalSeparator = ','; // depends on the Rent Search API server's locale, so we may assume it's constant
+	var priceRegex = new RegExp("^\\s*\\+?\\s*([^\\s\\d" + decimalSeparator + "])\\s*(\\d+)(?:" + decimalSeparator + "(\\d+))?$");
+	var matches = priceRegex.exec(priceStr);
+	
+	if (!matches) {
+		return blankValue;
+	}
+	
+	var defaultDecimalSeparator = '.'; // separator which JS forces us to use with parseFloat()
+	var currency = matches[1];
+	var amount = parseFloat(matches[2] + defaultDecimalSeparator + (matches[3] || '00'));
+	return {
+		currency: currency,
+		amount: amount
+	};
+}
+
+/**
  * Parses the result of a rented object search
  * @param {function} callback	The function to call when the search results have been parsed; this function must take a single argument, in which the parsed information will be passed
  * @param {object} httpResponse	The HTTP response of the search
@@ -35,8 +63,8 @@ function parseSearchResult(callback, httpResponse) {
 					searchResults = {
 						name: name,
 						price: {
-							firstDay: priceFirstDay,
-							nonFirstDay: priceNonFirstDay
+							firstDay: extractPrice(priceFirstDay),
+							nonFirstDay: extractPrice(priceNonFirstDay)
 						}
 					};
 				}
@@ -88,5 +116,6 @@ function sanitize(input) {
 	return (typeof input === 'string') ? input.replace(/\s+/g, '-') : input;
 }
 
+exports.extractPrice = extractPrice;
 exports.parseSearchResult = parseSearchResult;
 exports.search = search;
