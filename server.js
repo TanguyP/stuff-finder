@@ -6,6 +6,8 @@
 /* IMPORTS */
 const express = require('express');
 const argparse = require('argparse');
+const path = require('path');
+
 const rentSearchApi = require('./rentSearchApi');
 
 /* CODE */
@@ -21,6 +23,7 @@ const args = argParser.parseArgs();
 
 // Create server
 const server = express();
+server.use(express.static(path.join(__dirname, 'web')));
 (function() {
 	server.get('/search/:item', function(req, res) {rentSearchApi.search(req, res, args);})
 })();
