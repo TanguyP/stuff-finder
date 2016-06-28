@@ -1,3 +1,16 @@
-.search-api-message {
+* {
+	font-family: SofiaPro,Arial,Helvetica,sans-serif;
+}
+
+label {
+	margin-right: 0.5em;
+}
+
+.list-rent-search-results, .list-amazon-search-results {
+	float: left;
+	width: 25%;
+}
+
+.error-or-no-results {
 	color: #c30f0f;
 }

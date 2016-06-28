@@ -5,9 +5,9 @@ var AmazonSearchResult = React.createClass({
 	
 	render: function() {
 		return React.createElement(
-			'div',
-			null,
-			React.createElement('h2', null, this.props.ItemAttributes.Title),
+			'li',
+			{className: 'amazon-search-result'},
+			React.createElement('h3', null, this.props.ItemAttributes.Title),
 			React.createElement('a', {href: this.props.DetailPageURL}, 'See details')
 		);
 	}
@@ -22,27 +22,37 @@ var ListAmazonSearchResults = React.createClass({
 	render: function() {
 		if (this.props.results !== null) {
 			var results = this.props.results;
+			var className = '';
+			var children = [];
 			
-			// No results, or there was a problem in the Amazon API call
 			if (results.metaApiStatus !== 0 || !results.apiResponse || !results.apiResponse.Items.Item) {
+				// No results, or there was a problem in the Amazon API call
 				var msg;
 				if (results.metaApiStatus !== 0) {
 					msg = results.metaApiMessage || 'An unknown error occurred during the call to the Amazon API (sorry, that\'s vague but we have no additional information)';
 				}
 				else {
-					msg = "No results were found";
+					msg = "No results were found.";
 				}
 				
-				return React.createElement('div', {className: 'search-api-message'}, msg);
+				children = React.createElement('span', {className: 'error-or-no-results'}, msg);
+			}
+			else {
+				// Found results: display them
+				children = React.createElement(
+					'ul',
+					null,
+					results.apiResponse.Items.Item.map(function(item, index) {
+						return React.createElement(AmazonSearchResult, item);
+					})
+				);
 			}
 			
-			// Found results: display them
 			return React.createElement(
 				'div',
-				null,
-				results.apiResponse.Items.Item.map(function(item, index) {
-					return React.createElement(AmazonSearchResult, item);
-				})
+				{className: 'list-amazon-search-results'},
+				React.createElement('h2', null, 'Buy it on Amazon'),
+				children
 			);
 		}
 		
@@ -61,9 +71,9 @@ var RentSearchResult = React.createClass({
 		var priceForFirstDayText = 'Price for first day: ' + this.props.price.firstDay.currency + ' ' + this.props.price.firstDay.amount;
 		var priceForNonFirstDayText = 'Price for each subsequent day: ' + this.props.price.nonFirstDay.currency + ' ' + this.props.price.nonFirstDay.amount;
 		return React.createElement(
-			'div',
-			null,
-			React.createElement('h2', null, this.props.name),
+			'li',
+			{className: 'rent-search-result'},
+			React.createElement('h3', null, this.props.name),
 			React.createElement('span', null, priceForFirstDayText),
 			React.createElement('br'),
 			React.createElement('span', null, priceForNonFirstDayText)
@@ -83,18 +93,30 @@ var ListRentSearchResults = React.createClass({
 	render: function() {
 		if (this.props.results) {
 			var results = this.props.results;
+			var className = '';
+			var children = [];
 			
-			// No results for search, or malformed API response
 			if (! (results.name && results.price)) {
-				var msg = results.msg || 'An error occurred while searching';
-				return React.createElement('div', {className: 'search-api-message'}, msg);
+				// No results for search, or malformed API response
+				var msg = results.msg || 'An error occurred while searching.';
+				children = React.createElement('span', {className: 'error-or-no-results'}, msg);
+			}
+			else {
+				// Found results: display them
+				children = [
+					React.createElement('h2', null, 'Rent it from us'),
+					React.createElement(
+						'ul',
+						null,
+						React.createElement(RentSearchResult, results)
+					)
+				];
 			}
 			
-			// Found results: display them
 			return React.createElement(
 				'div',
-				null,
-				React.createElement(RentSearchResult, results)
+				{className: 'list-rent-search-results'},
+				children
 			);
 		}
 		
@@ -109,14 +131,35 @@ var ListRentSearchResults = React.createClass({
 var SearchForm = React.createClass({
 	
 	/**
+	 * Returns the form's data if it is valid, false otherwise
+	 * (that way the caller does not need to retrieve the form's data from
+	 * the DOM again)
+	 * @param {object|boolean}
+	 */
+	validateFormData: function() {
+		var itemInput = $('#searchedItemInput');
+		if (! (itemInput && itemInput[0] && itemInput[0].value)) {
+			return false;
+		}
+		return {
+			item: itemInput[0].value
+		};
+		
+	},
+	
+	/**
 	 * Searches the desired item
 	 */
 	searchItem: function(evt) {
 		evt.preventDefault();
-		var item = $('#searchedItemInput')[0].value;
+		var formData = this.validateFormData();
+		if (formData === false) {
+			alert('Please fill in the form!'); // alert() is ugly but this is just a POC
+			return; // invalid form data
+		}
 		
 		// Call Rent Search API
-		var fullRentApiUrl = this.props.rentApiUrl + item;
+		var fullRentApiUrl = this.props.rentApiUrl + formData.item;
 		$.ajax({
 			url: fullRentApiUrl,
 			success: function(data) {
@@ -136,7 +179,7 @@ var SearchForm = React.createClass({
 				password: globalConfig.metaApiPassword,
 				api: 'amazon',
 				SearchIndex: 'All',
-				Keywords: encodeURIComponent(item)
+				Keywords: encodeURIComponent(formData.item)
 			},
 			success: function(data) {
 				// Trigger refresh from StuffFinder
@@ -152,7 +195,7 @@ var SearchForm = React.createClass({
 		return React.createElement(
 			'form',
 			{onSubmit: this.searchItem},
-			React.createElement('label', {htmlFor: 'searchedItemInput'}, 'Desired item:'),
+			React.createElement('label', {htmlFor: 'searchedItemInput'}, 'What are you looking for?'),
 			React.createElement('input', {type: 'text', name: 'searchedItem', id: 'searchedItemInput'}),
 			React.createElement('input', {type: 'submit', value: 'Search'})
 		);
@@ -190,7 +233,8 @@ var StuffFinder = React.createClass({
 	render: function() {
 		return React.createElement(
 			'div',
-			null,
+			{className: 'stuff-finder'},
+			React.createElement('h1', {id: 'main-title'}, 'Stuff Finder - Need something to rent/buy?'),
 			React.createElement(
 				SearchForm,
 				{
