@@ -31,20 +31,18 @@ args.metaApiServer = (args.metaApiServer || '').replace(/\/$/, '');
 args.rentSearchServer = (args.rentSearchServer || '').replace(/\/$/, '');
 
 // Map server routes
-(function() {
-	server.get('/search/:item', function(req, res) {
-		rentSearchApi.search(req, res, args);
-	});
-	server.get('/dynamicData.js', function(req, res) {
-		res.render(
-			'dynamicData.ejs',
-			{
-				metaApiServer: args.metaApiServer,
-				metaApiPassword: args.metaApiPassword
-			}
-		);
-	});
-})();
+server.get('/search/:item', function(req, res) {
+	rentSearchApi.search(req, res, args);
+});
+server.get('/dynamicData.js', function(req, res) {
+	res.render(
+		'dynamicData.ejs',
+		{
+			metaApiServer: args.metaApiServer,
+			metaApiPassword: args.metaApiPassword
+		}
+	);
+});
 
 server.listen(8081);
 console.log("Server started, press Ctrl+C to exit");
