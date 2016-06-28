@@ -4,8 +4,9 @@
  */
 
 /* IMPORTS */
-const express = require('express');
 const argparse = require('argparse');
+const ejs = require('ejs');
+const express = require('express');
 const path = require('path');
 
 const rentSearchApi = require('./rentSearchApi');
@@ -24,9 +25,26 @@ const args = argParser.parseArgs();
 // Create server
 const server = express();
 server.use(express.static(path.join(__dirname, 'web')));
-(function() {
-	server.get('/search/:item', function(req, res) {rentSearchApi.search(req, res, args);})
-})();
-server.listen(8081);
 
+// Remove trailing '/' (if any) in server URLs
+args.metaApiServer = (args.metaApiServer || '').replace(/\/$/, '');
+args.rentSearchServer = (args.rentSearchServer || '').replace(/\/$/, '');
+
+// Map server routes
+(function() {
+	server.get('/search/:item', function(req, res) {
+		rentSearchApi.search(req, res, args);
+	});
+	server.get('/dynamicData.js', function(req, res) {
+		res.render(
+			'dynamicData.ejs',
+			{
+				metaApiServer: args.metaApiServer,
+				metaApiPassword: args.metaApiPassword
+			}
+		);
+	});
+})();
+
+server.listen(8081);
 console.log("Server started, press Ctrl+C to exit");

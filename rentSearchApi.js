@@ -104,8 +104,7 @@ function respondWithSearchResult(_, res, searchResult) {
  */
 function search(req, res, args) {
 	const item = sanitize((req.params.item || '').toLowerCase());
-	const rentSearchServer = (args.rentSearchServer || '').replace(/\/$/, ''); // remove trailing '/' if any
-	const url = rentSearchServer + "/p/" + item + "-huren?search=true&explanation=false";
+	const url = args.rentSearchServer + "/p/" + item + "-huren?search=true&explanation=false";
 	httpxUtils.getAndFollow(url, apart(parseSearchResult, apart(respondWithSearchResult, req, res)));
 }
 
