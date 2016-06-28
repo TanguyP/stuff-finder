@@ -1,6 +1,7 @@
 const apart = require('apart');
-const fdHttpRequest = require('fd-http-request');
 const jsdom = require('jsdom');
+
+const httpxUtils = require('./httpxUtils');
 
 /**
  * Extracts structured information about a price
@@ -103,8 +104,9 @@ function respondWithSearchResult(_, res, searchResult) {
  */
 function search(req, res, args) {
 	const item = sanitize((req.params.item || '').toLowerCase());
-	const url = args.rentSearchServer + "/p/" + item + "?search=true&explanation=false";
-	fdHttpRequest.get(url, apart(parseSearchResult, apart(respondWithSearchResult, req, res)));
+	const rentSearchServer = (args.rentSearchServer || '').replace(/\/$/, ''); // remove trailing '/' if any
+	const url = rentSearchServer + "/p/" + item + "-huren?search=true&explanation=false";
+	httpxUtils.getAndFollow(url, apart(parseSearchResult, apart(respondWithSearchResult, req, res)));
 }
 
 /**

@@ -21,7 +21,7 @@ exports.testExtractPrice = function(test) {
 	test.deepEqual(rentSearchApi.extractPrice(null), blankValue); // test robustness
 	
 	test.done();
-}
+};
 
 /**
  * @param {object} test	The nodeunit test object
@@ -49,7 +49,7 @@ function actualTestProcessSearchResult(test, err, data) {
 }
 
 exports.testProcessSearchResult = function(test) {
-	test.expect(3);
+	test.expect(3); // assertions are in the parseSearchResultCallback() function
 	const mockHtmlFilePath = path.resolve(__dirname, 'resources', 'rentSearchResult.html');
 	fs.readFile(mockHtmlFilePath, 'utf8', apart(actualTestProcessSearchResult, test));
-}
+};
