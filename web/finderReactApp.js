@@ -43,6 +43,7 @@ var ListAmazonSearchResults = React.createClass({
 					'ul',
 					null,
 					results.apiResponse.Items.Item.map(function(item, index) {
+						item.key = index;
 						return React.createElement(AmazonSearchResult, item);
 					})
 				);
@@ -239,8 +240,8 @@ var StuffFinder = React.createClass({
 				SearchForm,
 				{
 					rentApiUrl: '/search/',
-					updateRentSearchResults: this.updateRentSearchResults.bind(this),
-					updateAmazonSearchResults: this.updateAmazonSearchResults.bind(this)
+					updateRentSearchResults: this.updateRentSearchResults,
+					updateAmazonSearchResults: this.updateAmazonSearchResults
 				}
 			),
 			React.createElement(

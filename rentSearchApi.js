@@ -56,7 +56,7 @@ function parseSearchResult(callback, httpResponse) {
 					// Get product name
 					var name = $('h1.name', productDom).html().trim();
 					
-					// Get product price on first day and on subsequent days - TODO convert price to structured information: {string}currency & {number}amount
+					// Get product price on first day and on subsequent days
 					var priceTable = $('.price table', productDom);
 					var priceFirstDay = $('tr th+th h3', priceTable).html().trim();
 					var priceNonFirstDay = $('tr+tr td+td', priceTable).html().trim();
